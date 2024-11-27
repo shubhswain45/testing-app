@@ -9,3 +9,10 @@ body,
   background-color: black;
   color-scheme: dark;
 }
+
+/* Tailwind CSS customization for smaller placeholder font */
+.placeholder-small-font::placeholder {
+  font-family: 'Arial', sans-serif; /* Example font, replace with your choice */
+  font-size: 0.2rem; /* Smaller size */
+  color: #aaa; /* Optional: Set the color of the placeholder */
+}
