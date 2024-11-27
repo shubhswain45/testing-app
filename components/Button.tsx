@@ -1,7 +1,10 @@
-import { forwardRef } from "react"
-import { twMerge } from "tailwind-merge"
+import { forwardRef } from "react";
+import { twMerge } from "tailwind-merge";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+// Interface for button props, with a comment to satisfy linting
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  // Intentionally empty for future extensions
+}
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, disabled, type = "button", ...props }, ref) => {
@@ -10,19 +13,21 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         type={type}
         className={twMerge(
           `
-    w-full rounded-full bg-green-500 border border-transparent px-3 py-3
-    disabled:cursor-not-allowed disabled:opacity-50 text-black font-bold hover:opacity-75 transition`,
-          className,
+          w-full rounded-full bg-green-500 border border-transparent px-3 py-3
+          disabled:cursor-not-allowed disabled:opacity-50 text-black font-bold hover:opacity-75 transition
+          `,
+          className
         )}
         disabled={disabled}
         ref={ref}
-        {...props}>
+        {...props}
+      >
         {children}
       </button>
-    )
-  },
-)
+    );
+  }
+);
 
-Button.displayName = "Button"
+Button.displayName = "Button";
 
-export default Button
+export default Button;
