@@ -6,7 +6,6 @@ import { RxCaretLeft, RxCaretRight } from "react-icons/rx"
 import { HiHome } from "react-icons/hi"
 import { BiSearch } from "react-icons/bi"
 import { FaUserAlt } from "react-icons/fa"
-import Button from "./Button"
 import useAuthModal from "@/hooks/useAuthModal"
 
 interface HeaderProps {
@@ -56,17 +55,21 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             </div>
           ) : (
             <>
-              <div>
-                <Button className="bg-transparent text-neutral-300 font-medium" onClick={authModal.onOpen}>
-                  Sign up
-                </Button>
-              </div>
-              <div>
-                <Button className="bg-white px-6 py-2" onClick={authModal.onOpen}>
-                  Log in
-                </Button>
-              </div>
-            </>
+            <div>
+              <button className="bg-transparent text-neutral-300 font-medium" onClick={authModal.onOpen}>
+                Sign up
+              </button>
+            </div>
+            <div>
+              <button
+                className="bg-white text-black font-medium rounded-full px-6 py-2 hover:bg-gray-100 transition"
+                onClick={authModal.onOpen}
+              >
+                Log in
+              </button>
+            </div>
+          </>
+          
           )}
         </div>
       </div>
