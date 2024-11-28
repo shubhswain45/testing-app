@@ -1,48 +1,47 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import useAuthModal from "@/hooks/useAuthModal";
 import Modal from "./Modal";
 import { useSignupUser, useVerifyEmail } from "@/hooks/auth";
+import { Loader } from "lucide-react";
+
+type FormValues = {
+    username?: string;
+    fullName?: string;
+    email?: string;
+    password?: string;
+    emailOrUsername?: string;
+    verificationCode?: string;
+};
 
 const AuthModal = () => {
     const { onClose, isOpen } = useAuthModal();
 
-    const { mutate: signupUser, isPending, isSuccess } = useSignupUser();
-    const { mutate: verifyEmail } = useVerifyEmail();
+    const { mutate: signupUser, isPending: isSignuping, isSuccess } = useSignupUser();
+    const { mutate: verifyEmail, isPending: isVerifying } = useVerifyEmail();
 
-    // State for managing form data and modal view
-    const [formData, setFormData] = useState({
-        username: "",
-        fullName: "",
-        email: "",
-        password: "",
-        verificationCode: "", // Added for verification code input
-    });
+    const { register, handleSubmit, reset, setValue } = useForm<FormValues>();
 
-    const [formState, setFormState] = useState<
-        "login" | "signup" | "forgotPassword" | "verifyEmail"
-    >("signup");
+    const [formState, setFormState] = React.useState<"login" | "signup" | "forgotPassword" | "verifyEmail">("signup");
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (formState === "signup") {
-            signupUser({
-                username: formData.username,
-                email: formData.email,
-                fullName: formData.fullName,
-                password: formData.password,
-            });
-        } else if (formState === "verifyEmail") {
-           verifyEmail({code: formData.verificationCode, email: formData.email})
-        } else {
-            onClose(); // Close modal after login or password reset
+    const onSubmit = (data: FormValues) => {
+        switch (formState) {
+            case "signup":
+                signupUser({ username: data.username!, fullName: data.fullName!, email: data.email!, password: data.password! });
+                break;
+            case "verifyEmail":
+                verifyEmail({ code: data.verificationCode!, email: data.email! });
+                break;
+            case "login":
+                console.log("Logging in:", data.emailOrUsername, data.password);
+                break;
+            case "forgotPassword":
+                console.log("Forgot password for:", data.emailOrUsername);
+                break;
+            default:
+                break;
         }
     };
 
@@ -52,151 +51,155 @@ const AuthModal = () => {
         }
     };
 
-    const handleFormSwitch = (
-        state: "login" | "signup" | "forgotPassword" | "verifyEmail"
-    ) => {
+    const handleFormSwitch = (state: "login" | "signup" | "forgotPassword" | "verifyEmail") => {
         setFormState(state);
+        if (state !== "verifyEmail") {
+            reset(); // Reset all form fields when switching forms
+        }
     };
 
     useEffect(() => {
         if (isSuccess) {
             setFormState("verifyEmail");
         }
-    }, [isSuccess]);
+    }, [isSuccess, setValue]);
 
     return (
         <Modal
-            title={
-                formState === "signup"
-                    ? "Create an account"
-                    : formState === "login"
-                    ? "Login"
-                    : formState === "forgotPassword"
-                    ? "Forgot Password"
-                    : "Verify Email"
-            }
-            description={
-                formState === "signup"
-                    ? "Sign up to get started."
-                    : formState === "login"
-                    ? "Login to your account."
-                    : formState === "forgotPassword"
-                    ? "Enter your email to reset password."
-                    : "Enter the verification code sent to your email."
-            }
+            title={(() => {
+                switch (formState) {
+                    case "signup":
+                        return "Create an account";
+                    case "login":
+                        return "Login";
+                    case "forgotPassword":
+                        return "Forgot Password";
+                    case "verifyEmail":
+                        return "Verify Email";
+                    default:
+                        return "";
+                }
+            })()}
+            description={(() => {
+                switch (formState) {
+                    case "signup":
+                        return "Sign up to get started.";
+                    case "login":
+                        return "Login to your account.";
+                    case "forgotPassword":
+                        return "Enter your email to reset your password.";
+                    case "verifyEmail":
+                        return "Enter the verification code sent to your email.";
+                    default:
+                        return "";
+                }
+            })()}
             isOpen={isOpen}
             onChange={onChange}
         >
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Conditional rendering for different form views */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* Signup Form */}
                 {formState === "signup" && (
                     <>
-                        {/* Username */}
                         <div>
-                            <label
-                                htmlFor="username"
-                                className="block text-sm font-medium text-[#5b5c5b] focus:text-white"
-                            >
+                            <label className="block text-sm font-medium text-[#5b5c5b]">
                                 Username
                             </label>
                             <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                required
+                                {...register("username", { required: true })}
                                 placeholder="Your username"
-                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white focus:outline-none focus:ring-0 focus:border-white focus:text-white hover:border-white placeholder-custom"
+                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white"
                             />
                         </div>
-
-                        {/* Full Name */}
                         <div>
-                            <label
-                                htmlFor="fullName"
-                                className="block text-sm font-medium text-[#5b5c5b] focus:text-white"
-                            >
-                                Full Name
+                            <label className="block text-sm font-medium text-[#5b5c5b]">
+                                FullName
                             </label>
                             <input
-                                type="text"
-                                id="fullName"
-                                name="fullName"
-                                value={formData.fullName}
-                                onChange={handleChange}
-                                required
+                                {...register("fullName", { required: true })}
                                 placeholder="Your fullname"
-                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white focus:outline-none focus:ring-0 focus:border-white focus:text-white hover:border-white placeholder-custom"
+                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white"
                             />
                         </div>
-
-                        {/* Email */}
                         <div>
-                            <label
-                                htmlFor="email"
-                                className="block text-sm font-medium text-[#5b5c5b] focus:text-white"
-                            >
+                            <label className="block text-sm font-medium text-[#5b5c5b]">
                                 Email
                             </label>
                             <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
+                                {...register("email", {
+                                    required: true,
+                                    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                })}
                                 placeholder="Your email"
-                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white focus:outline-none focus:ring-0 focus:border-white focus:text-white hover:border-white placeholder-custom"
+                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white"
                             />
                         </div>
-
-                        {/* Password */}
                         <div>
-                            <label
-                                htmlFor="password"
-                                className="block text-sm font-medium text-[#5b5c5b] focus:text-white"
-                            >
+                            <label className="block text-sm font-medium text-[#5b5c5b]">
                                 Password
                             </label>
                             <input
+                                {...register("password", { required: true })}
                                 type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
                                 placeholder="Your password"
-                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white focus:outline-none focus:ring-0 focus:border-white focus:text-white hover:border-white placeholder-custom"
+                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white"
                             />
                         </div>
                     </>
                 )}
 
-                {formState === "verifyEmail" && (
-                    <div className="space-y-4 text-center text-white">
-                        <p>
-                            A verification email has been sent to your email address. Please
-                            check your inbox and enter the code below.
-                        </p>
+                {/* Login Form */}
+                {formState === "login" && (
+                    <>
                         <div>
-                            <label
-                                htmlFor="verificationCode"
-                                className="block text-sm font-medium text-[#5b5c5b] focus:text-white"
-                            >
-                                Verification Code
+                            <label className="block text-sm font-medium text-[#5b5c5b]">
+                                Email or Username
                             </label>
                             <input
-                                type="text"
-                                id="verificationCode"
-                                name="verificationCode"
-                                value={formData.verificationCode}
-                                onChange={handleChange}
-                                required
-                                placeholder="Enter verification code"
-                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white focus:outline-none focus:ring-0 focus:border-white focus:text-white hover:border-white placeholder-custom"
+                                {...register("emailOrUsername", { required: true })}
+                                placeholder="Your email or username"
+                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white"
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-[#5b5c5b]">
+                                Password
+                            </label>
+                            <input
+                                {...register("password", { required: true })}
+                                type="password"
+                                placeholder="Your password"
+                                className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white"
+                            />
+                        </div>
+                    </>
+                )}
+
+                {/* Forgot Password */}
+                {formState === "forgotPassword" && (
+                    <div>
+                        <label className="block text-sm font-medium text-[#5b5c5b]">
+                            Email or Username
+                        </label>
+                        <input
+                            {...register("emailOrUsername", { required: true })}
+                            placeholder="Your email or username"
+                            className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white"
+                        />
+                    </div>
+                )}
+
+                {/* Verify Email */}
+                {formState === "verifyEmail" && (
+                    <div>
+                        <label className="block text-sm font-medium text-[#5b5c5b]">
+                            Verification Code
+                        </label>
+                        <input
+                            {...register("verificationCode", { required: true })}
+                            placeholder="Enter your code"
+                            className="w-full mt-1 p-2 bg-[#1f1f1f] border border-[#5b5c5b] rounded-md text-white"
+                        />
                     </div>
                 )}
 
@@ -204,17 +207,71 @@ const AuthModal = () => {
                 <div>
                     <button
                         type="submit"
-                        className="mt-2 w-full bg-[#404040] border-2 border-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-500 hover:text-white transition"
+                        className="mt-2 w-full bg-[#404040] border-2 border-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-500"
                     >
-                        {formState === "signup"
-                            ? "Sign Up"
-                            : formState === "login"
-                            ? "Login"
-                            : formState === "forgotPassword"
-                            ? "Reset Password"
-                            : "Verify"}
+                        {(() => {
+                            switch (formState) {
+                                case "signup":
+                                    return isSignuping ? <Loader className="animate-spin mx-auto" size={25} /> : "Sign Up";
+                                case "login":
+                                    return "Login";
+                                case "forgotPassword":
+                                    return "Forgot Password";
+                                case "verifyEmail":
+                                    return isVerifying ? <Loader className="animate-spin mx-auto" size={25} /> : "Verify";
+                                default:
+                                    return "";
+                            }
+                        })()}
                     </button>
                 </div>
+
+                {/* Form-Switching Text */}
+                <p className="text-center text-sm text-[#5b5c5b]">
+                    {formState === "signup" ? (
+                        <>
+                            Already have an account?{" "}
+                            <button
+                                type="button"
+                                onClick={() => handleFormSwitch("login")}
+                                className="text-green-500 hover:underline"
+                            >
+                                Log in
+                            </button>
+                        </>
+                    ) : formState === "login" ? (
+                        <>
+                            Forgot your password?{" "}
+                            <button
+                                type="button"
+                                onClick={() => handleFormSwitch("forgotPassword")}
+                                className="text-green-500 hover:underline"
+                            >
+                                Forgot password
+                            </button>
+                            <br />
+                            Don't have an account?{" "}
+                            <button
+                                type="button"
+                                onClick={() => handleFormSwitch("signup")}
+                                className="text-green-500 hover:underline"
+                            >
+                                Sign up
+                            </button>
+                        </>
+                    ) : formState === "forgotPassword" ? (
+                        <>
+                            Remembered your password?{" "}
+                            <button
+                                type="button"
+                                onClick={() => handleFormSwitch("login")}
+                                className="text-green-500 hover:underline"
+                            >
+                                Log in
+                            </button>
+                        </>
+                    ) : null}
+                </p>
             </form>
         </Modal>
     );
