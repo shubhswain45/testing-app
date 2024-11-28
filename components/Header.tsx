@@ -48,10 +48,10 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
         <div className="flex justufy-between items-center gap-x-4">
           {false ? (
             <div className="flex gap-x-4 items-center">
-              <Button onClick={handleLogout}>Logout</Button>
-              <Button className="bg-white" onClick={() => router.push("/account")}>
+              <button onClick={handleLogout}>Logout</button>
+              <button className="bg-white" onClick={() => router.push("/account")}>
                 <FaUserAlt />
-              </Button>
+              </button>
             </div>
           ) : (
             <>
