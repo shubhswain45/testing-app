@@ -3,10 +3,13 @@
 import React, { useState } from "react";
 import useAuthModal from "@/hooks/useAuthModal";
 import Modal from "./Modal";
+import { useSignupUser } from "@/hooks/auth";
 
 const AuthModal = () => {
     const { onClose, isOpen } = useAuthModal();
 
+    const {mutate: signupUser, isPending} = useSignupUser()
+    
     // State for managing form data and modal view
     const [formData, setFormData] = useState({
         username: "",
@@ -28,7 +31,8 @@ const AuthModal = () => {
 
         if (formState === 'signup') {
             // Simulate successful signup, switch to verify email page
-            setFormState('verifyEmail');
+            signupUser({username: formData.username,  email: formData.email, fullName: formData.fullName, password: formData.password})
+            // setFormState('verifyEmail');
         } else {
             onClose(); // Close modal after login or password reset
         }
@@ -194,7 +198,7 @@ const AuthModal = () => {
                 <div>
                     <button
                         type="submit"
-                        className="w-full bg-[#404040] border-2 border-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-500 hover:text-white transition"
+                        className="mt-2 w-full bg-[#404040] border-2 border-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-500 hover:text-white transition"
                     >
                         {formState === 'signup' ? "Sign Up" : formState === 'login' ? "Login" : formState === 'forgotPassword' ? "Reset Password" : "Close"}
                     </button>
