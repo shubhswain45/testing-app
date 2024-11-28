@@ -250,7 +250,7 @@ const AuthModal = () => {
                                 Forgot password
                             </button>
                             <br />
-                            Don't have an account?{" "}
+                            Dont have an account?{" "}
                             <button
                                 type="button"
                                 onClick={() => handleFormSwitch("signup")}
