@@ -1,5 +1,5 @@
 import { createGraphqlClient } from "@/clients/api";
-import { LoginUserPayload, SignupUserPayload, VerifyEmailMutation, VerifyEmailPayload } from "@/gql/graphql";
+import { LoginUserPayload, SignupUserPayload, VerifyEmailPayload } from "@/gql/graphql";
 import { loginUserMutation, signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
 import { getCurrentUserQuery } from "@/graphql/queries/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -63,9 +63,6 @@ export const useLoginUser = (setIsVerified: React.Dispatch<React.SetStateAction<
 };
 
 export const useSignupUser = () => {
-    const queryClient = useQueryClient();
-    const router = useRouter();
-
     return useMutation({
         mutationFn: async (userData: SignupUserPayload) => {
             // Check if all required fields are filled

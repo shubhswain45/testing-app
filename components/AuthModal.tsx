@@ -21,7 +21,7 @@ const AuthModal = () => {
 
     const [isVerified, setIsVerified] = useState(true)
 
-    const { data: user, isLoading } = useCurrentUser()
+    const { data: user } = useCurrentUser()
 
     const { mutate: signupUser, isPending: isSignuping, isSuccess: signupSuccess } = useSignupUser();
     const { mutate: verifyEmail, isPending: isVerifying } = useVerifyEmail();
