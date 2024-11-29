@@ -33,3 +33,10 @@ export const verifyEmailMutation = graphql(`#graphql
         }
     }
 `)
+
+
+export const logoutUserMutation = graphql(`#graphql
+    mutation LogoutUser {
+        logoutUser
+    }
+`)

@@ -1,6 +1,6 @@
 import { createGraphqlClient } from "@/clients/api";
 import { LoginUserPayload, SignupUserPayload, VerifyEmailPayload } from "@/gql/graphql";
-import { loginUserMutation, signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
+import { loginUserMutation, logoutUserMutation, signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
 import { getCurrentUserQuery } from "@/graphql/queries/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -63,6 +63,7 @@ export const useLoginUser = (setIsVerified: React.Dispatch<React.SetStateAction<
 };
 
 export const useSignupUser = () => {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (userData: SignupUserPayload) => {
             // Check if all required fields are filled
@@ -92,6 +93,9 @@ export const useSignupUser = () => {
         },
 
         onSuccess: (data) => {
+            queryClient.setQueryData(["currentUser"], () => {
+                return { getCurrentUser: data }
+            })
             toast.success("signup successfully")
         },
 
@@ -134,3 +138,23 @@ export const useVerifyEmail = () => {
         }
     });
 }
+
+export const useLogoutUser = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const graphqlClient = createGraphqlClient()
+            const { logoutUser } = await graphqlClient.request(logoutUserMutation);
+            return logoutUser;
+        },
+
+        onSuccess: (data) => {
+            queryClient.setQueriesData({ queryKey: ['currentUser'] }, () => ({
+                getAuthUser: null
+            }));
+
+            toast.success("Logout successful!");
+        },
+    });
+};

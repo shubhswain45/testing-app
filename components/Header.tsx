@@ -7,8 +7,9 @@ import { HiHome } from "react-icons/hi"
 import { BiSearch } from "react-icons/bi"
 import { FaUserAlt } from "react-icons/fa"
 import useAuthModal from "@/hooks/useAuthModal"
-import { useCurrentUser } from "@/hooks/auth"
-// import Loader from "./Loader" // Assuming you have a loader component
+import { useCurrentUser, useLogoutUser } from "@/hooks/auth"
+import ConfirmationModel from "./ConfirmationModel"
+import { useState } from "react"
 
 interface HeaderProps {
   children: React.ReactNode
@@ -19,10 +20,11 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const router = useRouter()
   const authModal = useAuthModal()
   const { data, isLoading } = useCurrentUser() // Fetch the current user data
+  const { mutate: logoutUser } = useLogoutUser()
 
-  const handleLogout = async () => {
-    // handle logout logic here (e.g., clearing tokens, redirecting, etc.)
-  }
+  // State to manage the confirmation dialog visibility
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+
 
   return (
     <div className={twMerge(`h-fit bg-gradient-to-b from-emerald-800 p-6`, className)}>
@@ -55,23 +57,20 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
               {/* Show loading buttons while data is loading */}
               <div className="flex gap-x-4 items-center">
                 <button
-                  onClick={handleLogout}
                   className="bg-white text-black font-medium rounded-full px-6 py-2 hover:bg-gray-100 transition"
                 >
-                  {/* Logout */}
                 </button>
                 <button
                   className="bg-white text-black font-medium rounded-full px-6 py-2 hover:bg-gray-100 transition content-center"
                 >
-                  {/* <FaUserAlt size={20} /> */}
                 </button>
               </div>
             </>
-          ) : data?.getCurrentUser && data.getCurrentUser.isVerified? (
+          ) : data?.getCurrentUser && data.getCurrentUser.isVerified ? (
             // If user is logged in, show Account and Logout buttons
             <div className="flex gap-x-4 items-center">
               <button
-                onClick={handleLogout}
+                onClick={() => setIsConfirmationOpen(true)} // Open confirmation dialog
                 className="bg-white text-black font-medium text-sm rounded-full px-6 py-2 hover:bg-gray-100 transition"
               >
                 Logout
@@ -107,6 +106,15 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
           )}
         </div>
       </div>
+      {/* ConfirmationModel for logout */}
+      <ConfirmationModel
+        open={isConfirmationOpen}
+        onOpenChange={setIsConfirmationOpen}
+        title="Confirm Logout"
+        description="Are you sure you want to log out? You will need to log in again to access your account."
+        onConfirm={() => logoutUser()} // Perform logout on confirmation
+        onCancel={() => setIsConfirmationOpen(false)} // Close dialog on cancel
+      />
       {children}
     </div>
   )
