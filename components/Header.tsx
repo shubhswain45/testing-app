@@ -7,6 +7,8 @@ import { HiHome } from "react-icons/hi"
 import { BiSearch } from "react-icons/bi"
 import { FaUserAlt } from "react-icons/fa"
 import useAuthModal from "@/hooks/useAuthModal"
+import { useCurrentUser } from "@/hooks/auth"
+// import Loader from "./Loader" // Assuming you have a loader component
 
 interface HeaderProps {
   children: React.ReactNode
@@ -14,12 +16,12 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ children, className }) => {
-
   const router = useRouter()
   const authModal = useAuthModal()
+  const { data, isLoading } = useCurrentUser() // Fetch the current user data
 
   const handleLogout = async () => {
-
+    // handle logout logic here (e.g., clearing tokens, redirecting, etc.)
   }
 
   return (
@@ -28,12 +30,14 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
         <div className="hidden md:flex gap-x-2 items-center">
           <button
             className="rounded-full bg-black flex justify-center items-center hover:opacity-75 transition"
-            onClick={() => router.back()}>
+            onClick={() => router.back()}
+          >
             <RxCaretLeft className="text-white" size={35} />
           </button>
           <button
             className="rounded-full bg-black flex justify-center items-center hover:opacity-75 transition"
-            onClick={() => router.forward()}>
+            onClick={() => router.forward()}
+          >
             <RxCaretRight className="text-white" size={35} />
           </button>
         </div>
@@ -45,31 +49,61 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             <BiSearch className="text-black" size={20} />
           </button>
         </div>
-        <div className="flex justufy-between items-center gap-x-4">
-          {false ? (
+        <div className="flex justify-between items-center gap-x-4">
+          {isLoading ? (
+            <>
+              {/* Show loading buttons while data is loading */}
+              <div className="flex gap-x-4 items-center">
+                <button
+                  onClick={handleLogout}
+                  className="bg-white text-black font-medium rounded-full px-6 py-2 hover:bg-gray-100 transition"
+                >
+                  {/* Logout */}
+                </button>
+                <button
+                  className="bg-white text-black font-medium rounded-full px-6 py-2 hover:bg-gray-100 transition content-center"
+                >
+                  {/* <FaUserAlt size={20} /> */}
+                </button>
+              </div>
+            </>
+          ) : data?.getCurrentUser && data.getCurrentUser.isVerified? (
+            // If user is logged in, show Account and Logout buttons
             <div className="flex gap-x-4 items-center">
-              <button onClick={handleLogout}>Logout</button>
-              <button className="bg-white" onClick={() => router.push("/account")}>
-                <FaUserAlt />
+              <button
+                onClick={handleLogout}
+                className="bg-white text-black font-medium text-sm rounded-full px-6 py-2 hover:bg-gray-100 transition"
+              >
+                Logout
+              </button>
+
+              <button
+                className="bg-white text-black font-medium rounded-full px-6 py-2 hover:bg-gray-100 transition content-center"
+                onClick={() => router.push("/account")}
+              >
+                <FaUserAlt size={19} />
               </button>
             </div>
           ) : (
+            // If no user is logged in, show Sign Up and Log In buttons
             <>
-            <div>
-              <button className="bg-transparent text-neutral-300 font-medium" onClick={authModal.onOpen}>
-                Sign up
-              </button>
-            </div>
-            <div>
-              <button
-                className="bg-white text-black font-medium rounded-full px-6 py-2 hover:bg-gray-100 transition"
-                onClick={authModal.onOpen}
-              >
-                Log in
-              </button>
-            </div>
-          </>
-          
+              <div>
+                <button
+                  className="bg-transparent text-sm text-neutral-300 font-medium"
+                  onClick={authModal.onOpen}
+                >
+                  Sign up
+                </button>
+              </div>
+              <div>
+                <button
+                  className="bg-white text-black  text-sm font-medium rounded-full px-6 py-2 hover:bg-gray-100 transition"
+                  onClick={authModal.onOpen}
+                >
+                  Log in
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>

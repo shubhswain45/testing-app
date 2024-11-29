@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useAuthModal from "@/hooks/useAuthModal";
 import Modal from "./Modal";
-import { useSignupUser, useVerifyEmail } from "@/hooks/auth";
+import { useCurrentUser, useLoginUser, useSignupUser, useVerifyEmail } from "@/hooks/auth";
 import { Loader } from "lucide-react";
 
 type FormValues = {
@@ -19,8 +19,13 @@ type FormValues = {
 const AuthModal = () => {
     const { onClose, isOpen } = useAuthModal();
 
-    const { mutate: signupUser, isPending: isSignuping, isSuccess } = useSignupUser();
+    const [isVerified, setIsVerified] = useState(true)
+
+    const { data: user, isLoading } = useCurrentUser()
+
+    const { mutate: signupUser, isPending: isSignuping, isSuccess: signupSuccess } = useSignupUser();
     const { mutate: verifyEmail, isPending: isVerifying } = useVerifyEmail();
+    const { mutate: loginUser, isPending: isLoging, isSuccess: loginSuccess } = useLoginUser(setIsVerified)
 
     const { register, handleSubmit, reset, setValue } = useForm<FormValues>();
 
@@ -32,10 +37,12 @@ const AuthModal = () => {
                 signupUser({ username: data.username!, fullName: data.fullName!, email: data.email!, password: data.password! });
                 break;
             case "verifyEmail":
-                verifyEmail({ code: data.verificationCode!, email: data.email! });
+                const email = user?.getCurrentUser?.email || data.email
+                verifyEmail({ code: data.verificationCode!, email: email! });
                 break;
             case "login":
                 console.log("Logging in:", data.emailOrUsername, data.password);
+                loginUser({ usernameOrEmail: data.emailOrUsername!, password: data.password! })
                 break;
             case "forgotPassword":
                 console.log("Forgot password for:", data.emailOrUsername);
@@ -59,10 +66,16 @@ const AuthModal = () => {
     };
 
     useEffect(() => {
-        if (isSuccess) {
+        if (signupSuccess) {
             setFormState("verifyEmail");
         }
-    }, [isSuccess, setValue]);
+
+        if (loginSuccess) {
+            if (!isVerified) {
+                setFormState("verifyEmail");
+            }
+        }
+    }, [signupSuccess, setValue, loginSuccess]);
 
     return (
         <Modal
@@ -214,7 +227,7 @@ const AuthModal = () => {
                                 case "signup":
                                     return isSignuping ? <Loader className="animate-spin mx-auto" size={25} /> : "Sign Up";
                                 case "login":
-                                    return "Login";
+                                    return isLoging ? <Loader className="animate-spin mx-auto" size={25} /> : "Login";
                                 case "forgotPassword":
                                     return "Forgot Password";
                                 case "verifyEmail":

@@ -8,6 +8,19 @@ export const signupUserMutation = graphql(`#graphql
     }
 `)
 
+export const loginUserMutation = graphql(`#graphql
+    mutation LoginUser($payload: LoginUserPayload!) {
+        loginUser(payload: $payload) {
+            id
+            profileImageURL
+            email
+            username
+            fullName
+            isVerified
+        }
+    }
+`)
+
 export const verifyEmailMutation = graphql(`#graphql
     mutation VerifyEmail($payload: VerifyEmailPayload!) {
         verifyEmail(payload: $payload) {

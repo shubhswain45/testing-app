@@ -1,9 +1,66 @@
 import { createGraphqlClient } from "@/clients/api";
-import { SignupUserPayload, VerifyEmailMutation, VerifyEmailPayload } from "@/gql/graphql";
-import { signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LoginUserPayload, SignupUserPayload, VerifyEmailMutation, VerifyEmailPayload } from "@/gql/graphql";
+import { loginUserMutation, signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
+import { getCurrentUserQuery } from "@/graphql/queries/auth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import useAuthModal from "./useAuthModal";
+
+export const useCurrentUser = () => {
+    return useQuery({
+        queryKey: ['currentUser'],
+        queryFn: async () => {
+            const graphqlClient = createGraphqlClient()
+            const data = await graphqlClient.request(getCurrentUserQuery)
+            return data
+        }
+    })
+}
+
+export const useLoginUser = (setIsVerified: React.Dispatch<React.SetStateAction<boolean>>) => {
+    const queryClient = useQueryClient();
+    const router = useRouter();
+    const authModal = useAuthModal()
+
+    return useMutation({
+        mutationFn: async (userData: LoginUserPayload) => {
+            // Check if all required fields are filled
+            if (!userData.usernameOrEmail || !userData.password) {
+                throw new Error("Please fill both fields");
+            }
+
+            try {
+                const graphqlClient = createGraphqlClient()
+                const { loginUser } = await graphqlClient.request(loginUserMutation, { payload: userData });
+                return loginUser;
+            } catch (error: any) {
+                // Throw only the error message for concise output
+                throw new Error(error?.response?.errors?.[0]?.message || "Something went wrong");
+            }
+        },
+
+        onSuccess: (data) => {
+            if (!data?.isVerified) {
+                setIsVerified(false)
+                toast.error("Your account is not verified! Pls verified");
+
+            } else {
+                authModal.onClose()
+                toast.success("Login successful!");
+            }
+
+            queryClient.setQueryData(["currentUser"], () => {
+                return { getCurrentUser: data }
+            })
+        },
+
+        onError: (error: any) => {
+            const errorMessage = error.message.split(':').pop()?.trim() || "Something went wrong";
+            toast.error(errorMessage);
+        }
+    });
+};
 
 export const useSignupUser = () => {
     const queryClient = useQueryClient();
@@ -50,7 +107,8 @@ export const useSignupUser = () => {
 
 export const useVerifyEmail = () => {
     const queryClient = useQueryClient();
-
+    const authModal = useAuthModal()
+    
     return useMutation({
         mutationFn: async (payload: VerifyEmailPayload) => {
             try {
@@ -64,7 +122,12 @@ export const useVerifyEmail = () => {
         },
 
         onSuccess: (data) => {
-            
+
+            queryClient.setQueryData(["currentUser"], () => {
+                return { getCurrentUser: data }
+            })
+            authModal.onClose()
+
             toast.success("Email verification successful!");
         },
 
