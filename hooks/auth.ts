@@ -1,11 +1,12 @@
 import { createGraphqlClient } from "@/clients/api";
 import { LoginUserPayload, SignupUserPayload, VerifyEmailPayload } from "@/gql/graphql";
-import { loginUserMutation, logoutUserMutation, signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
+import { forgotPasswordMutation, loginUserMutation, logoutUserMutation, signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
 import { getCurrentUserQuery } from "@/graphql/queries/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import useAuthModal from "./useAuthModal";
+import { error } from "console";
 
 export const useCurrentUser = () => {
     return useQuery({
@@ -158,3 +159,30 @@ export const useLogoutUser = () => {
         },
     });
 };
+
+export const useForgotPassword = () => {
+    return useMutation({
+        mutationFn: async (emailOrUsername: string) => {
+            try {
+                if(!emailOrUsername) {
+                    throw new Error("Email or Username is required!")
+                }
+                const graphqlClient = createGraphqlClient()
+                const { forgotPassword } = await graphqlClient.request(forgotPasswordMutation, { emailOrUsername });
+                return forgotPassword;
+            } catch (error: any) {
+                // Throw only the error message for concise output
+                throw new Error(error?.response?.errors?.[0]?.message || "Something went wrong");
+            }
+        },
+
+        onSuccess: (data) => {
+            toast.success("Reset link send successful to your Email!");
+        },
+
+        onError: (error) => {
+            const errorMessage = error.message.split(':').pop()?.trim() || "Something went wrong";
+            toast.error(errorMessage);
+        }
+    });
+}

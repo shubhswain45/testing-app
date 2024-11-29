@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useAuthModal from "@/hooks/useAuthModal";
 import Modal from "./Modal";
-import { useCurrentUser, useLoginUser, useSignupUser, useVerifyEmail } from "@/hooks/auth";
+import { useCurrentUser, useForgotPassword, useLoginUser, useSignupUser, useVerifyEmail } from "@/hooks/auth";
 import { Loader } from "lucide-react";
 
 type FormValues = {
@@ -26,6 +26,7 @@ const AuthModal = () => {
     const { mutate: signupUser, isPending: isSignuping, isSuccess: signupSuccess } = useSignupUser();
     const { mutate: verifyEmail, isPending: isVerifying } = useVerifyEmail();
     const { mutate: loginUser, isPending: isLoging, isSuccess: loginSuccess } = useLoginUser(setIsVerified)
+    const { mutate: forgotPassword, isPending: isForgotingPassword } = useForgotPassword()
 
     const { register, handleSubmit, reset, setValue } = useForm<FormValues>();
 
@@ -45,7 +46,7 @@ const AuthModal = () => {
                 loginUser({ usernameOrEmail: data.emailOrUsername!, password: data.password! })
                 break;
             case "forgotPassword":
-                console.log("Forgot password for:", data.emailOrUsername);
+                forgotPassword(data.emailOrUsername || "")
                 break;
             default:
                 break;
@@ -229,7 +230,7 @@ const AuthModal = () => {
                                 case "login":
                                     return isLoging ? <Loader className="animate-spin mx-auto" size={25} /> : "Login";
                                 case "forgotPassword":
-                                    return "Forgot Password";
+                                    return isForgotingPassword ? <Loader className="animate-spin mx-auto" size={25} /> : "Forgot Password";
                                 case "verifyEmail":
                                     return isVerifying ? <Loader className="animate-spin mx-auto" size={25} /> : "Verify";
                                 default:

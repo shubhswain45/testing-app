@@ -40,3 +40,9 @@ export const logoutUserMutation = graphql(`#graphql
         logoutUser
     }
 `)
+
+export const forgotPasswordMutation = graphql(`#graphql
+    mutation ForgotPassword($emailOrUsername: String!) {
+  forgotPassword(emailOrUsername: $emailOrUsername)
+}
+`)
