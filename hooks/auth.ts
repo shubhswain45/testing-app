@@ -1,6 +1,6 @@
 import { createGraphqlClient } from "@/clients/api";
-import { LoginUserPayload, SignupUserPayload, VerifyEmailPayload } from "@/gql/graphql";
-import { forgotPasswordMutation, loginUserMutation, logoutUserMutation, signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
+import { LoginUserPayload, ResetPasswordPayload, SignupUserPayload, VerifyEmailPayload } from "@/gql/graphql";
+import { forgotPasswordMutation, loginUserMutation, logoutUserMutation, resetPasswordMutation, signupUserMutation, verifyEmailMutation } from "@/graphql/mutations/auth";
 import { getCurrentUserQuery } from "@/graphql/queries/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -178,6 +178,39 @@ export const useForgotPassword = () => {
 
         onSuccess: (data) => {
             toast.success("Reset link send successful to your Email!");
+        },
+
+        onError: (error) => {
+            const errorMessage = error.message.split(':').pop()?.trim() || "Something went wrong";
+            toast.error(errorMessage);
+        }
+    });
+}
+
+export const useResetPassword = () => {
+    return useMutation({
+        mutationFn: async (payload: ResetPasswordPayload) => {
+
+            if (payload.newPassword != payload.confirmPassword) {
+                throw new Error("Password does't match.")
+            }
+
+            if (payload.newPassword.length < 6) {
+                throw new Error("Password must be at least 6 characters long.");
+            }
+
+            try {
+                const graphqlClient = createGraphqlClient()
+                const { resetPassword } = await graphqlClient.request(resetPasswordMutation, { payload });
+                return resetPassword;
+            } catch (error: any) {
+                // Throw only the error message for concise output
+                throw new Error(error?.response?.errors?.[0]?.message || "Something went wrong");
+            }
+        },
+
+        onSuccess: (data) => {
+            toast.success("Reset password successful!");
         },
 
         onError: (error) => {

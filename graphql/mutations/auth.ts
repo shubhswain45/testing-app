@@ -46,3 +46,10 @@ export const forgotPasswordMutation = graphql(`#graphql
   forgotPassword(emailOrUsername: $emailOrUsername)
 }
 `)
+
+
+export const resetPasswordMutation = graphql(`#graphql
+    mutation ResetPassword($payload: ResetPasswordPayload!){       
+        resetPassword(payload: $payload)
+    }
+`)
