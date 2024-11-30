@@ -13,7 +13,6 @@ import usePreviewFile from "@/hooks/usePrevFile";
 import { Upload } from "lucide-react";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
 
 interface NewSong {
     title: string;
@@ -27,8 +26,8 @@ interface CreateTrackDialogProps {
 }
 
 const CreateTrackDialog = ({ songDialogOpen, setSongDialogOpen }: CreateTrackDialogProps) => {
-    const { handleFileChange: handleImgChange, fileURL: imgUrl, setFileURL: setImgUrl } = usePreviewFile("image");
-    const { handleFileChange: handleAudioChange, fileURL: audioUrl, setFileURL: setAudioUrl } = usePreviewFile("audio");
+    const { handleFileChange: handleImgChange, fileURL: imgUrl} = usePreviewFile("image");
+    const { handleFileChange: handleAudioChange, fileURL: audioUrl} = usePreviewFile("audio");
     const { mutate: createTrack, isPending } = useCreateTrack();
 
     const audioInputRef = useRef<HTMLInputElement>(null);
