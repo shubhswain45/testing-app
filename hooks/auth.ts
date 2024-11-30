@@ -110,7 +110,7 @@ export const useSignupUser = () => {
 export const useVerifyEmail = () => {
     const queryClient = useQueryClient();
     const authModal = useAuthModal()
-    
+
     return useMutation({
         mutationFn: async (payload: VerifyEmailPayload) => {
             try {
@@ -163,10 +163,10 @@ export const useLogoutUser = () => {
 export const useForgotPassword = () => {
     return useMutation({
         mutationFn: async (emailOrUsername: string) => {
+            if (!emailOrUsername) {
+                throw new Error("Email or Username is required!")
+            }
             try {
-                if(!emailOrUsername) {
-                    throw new Error("Email or Username is required!")
-                }
                 const graphqlClient = createGraphqlClient()
                 const { forgotPassword } = await graphqlClient.request(forgotPasswordMutation, { emailOrUsername });
                 return forgotPassword;

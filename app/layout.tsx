@@ -5,6 +5,7 @@ import ModalProvider from "@/providers/ModalProvider";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { QueryClientProviders } from "@/providers/QueryClientProviders";
+import CreateTrack from "@/components/CreateTrack";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,6 +37,7 @@ export default function RootLayout({
           <ModalProvider />
           <ToastContainer />
           {children}
+          <CreateTrack/>
         </QueryClientProviders>
       </body>
     </html>
