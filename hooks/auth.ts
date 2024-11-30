@@ -6,7 +6,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import useAuthModal from "./useAuthModal";
-import { error } from "console";
 
 export const useCurrentUser = () => {
     return useQuery({

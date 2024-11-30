@@ -1,9 +1,21 @@
 import { createGraphqlClient } from "@/clients/api";
 import { CreateTrackPayload } from "@/gql/graphql";
 import { createTrackMutation } from "@/graphql/mutations/track";
-import { useMutation } from "@tanstack/react-query";
+import { getFeedTracksQuery } from "@/graphql/queries/track";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+
+export const useGetFeedTracks = () => {
+    return useQuery({
+        queryKey: ["feedPosts"],
+        queryFn: async () => {
+            const graphqlClient = createGraphqlClient()
+            const { getFeedTracks } = await graphqlClient.request(getFeedTracksQuery);
+            return getFeedTracks;
+        }
+    })
+};
 
 export const useCreateTrack = () => {
     const router = useRouter();

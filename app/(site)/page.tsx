@@ -1,10 +1,18 @@
+"use client"
 import Header from '@/components/Header'
 import ListItem from '@/components/ListItem'
+import PageContent from '@/components/PageContent'
+import { usePlaybackControlsStore } from '@/store/PlaybackControlsStore'
 import React from 'react'
 
-function page() {
+function Page() {
+  const { isOpen } = usePlaybackControlsStore()
+  const height = isOpen ? "h-[500px]" : "h-full" // fixed height value syntax
+
+  console.log(height, "height");
+  
   return (
-    <div className="text-neutral-400 rounded-lg w-full h-full overflow-hidden overflow-y-auto">
+    <div className={`text-neutral-400 rounded-lg w-full ${height} overflow-hidden overflow-y-auto`}>
       <Header>
         <div className="mb-2">
           <h1 className="text-white text-3xl font-semibold">Welcome back</h1>
@@ -17,10 +25,10 @@ function page() {
         <div className="flex justify-between items-center">
           <h1 className="text-white text-2xl font-semibold">Newest Songs</h1>
         </div>
-        {/* <PageContent songs={songs} /> */}
+        <PageContent />
       </div>
     </div>
   )
 }
 
-export default page
+export default Page

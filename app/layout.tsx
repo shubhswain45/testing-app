@@ -6,6 +6,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { QueryClientProviders } from "@/providers/QueryClientProviders";
 import CreateTrack from "@/components/CreateTrack";
+import MusicBar from "@/components/MusicBar";
+import HandlePlaybackControls from "@/components/HandlePlaybackControls";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -38,6 +40,7 @@ export default function RootLayout({
           <ToastContainer />
           {children}
           <CreateTrack/>
+          <HandlePlaybackControls/>
         </QueryClientProviders>
       </body>
     </html>
