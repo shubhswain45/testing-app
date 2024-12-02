@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCw, Heart } from "lucide-react";
 import Header from "@/components/Header";
 import { BiDotsVertical } from "react-icons/bi";
-import { useGetTrackById } from "@/hooks/track";
+import { useGetTrackById, useLikeTrack } from "@/hooks/track";
 import { usePlayAudioStore } from "@/store/PlayAudioStore";
 
 function AudioPage() {
@@ -18,8 +18,10 @@ function AudioPage() {
   const { setAudioDetails, audioDetails } = usePlayAudioStore();
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [scaleAnimation, setScaleAnimation] = useState(false); // State to trigger scale animation
+  const [isLiked, setIsLiked] = useState(track?.hasLiked || false);
+  const [scaleAnimation, setScaleAnimation] = useState(false);
+
+  const { mutate: likeTrack } = useLikeTrack(setIsLiked);
 
   const audioElement = useRef<HTMLAudioElement | null>(null);
 
@@ -33,6 +35,7 @@ function AudioPage() {
         audioFileUrl: track?.audioFileUrl || "",
         audioRef: audioElement,
       });
+      setIsLiked(track?.hasLiked || false);
     }
   }, [setAudioDetails, track]);
 
@@ -66,7 +69,9 @@ function AudioPage() {
   const formatTime = useCallback((time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -77,10 +82,8 @@ function AudioPage() {
       audio?.play();
     }
     setAudioDetails({ isPlaying: !audioDetails.isPlaying });
-
-    // Trigger scale animation when play button is clicked
     setScaleAnimation(true);
-    setTimeout(() => setScaleAnimation(false), 300); // Reset animation after 0.3s
+    setTimeout(() => setScaleAnimation(false), 300);
   }, [audioDetails.isPlaying, setAudioDetails]);
 
   const skipTime = (seconds: number) => {
@@ -119,7 +122,7 @@ function AudioPage() {
         <Header>
           <div className="flex flex-col items-center justify-center w-full h-full">
             {/* Image Section */}
-            <div className="w-[350px] h-[350px] relative overflow-hidden rounded-md">
+            <div className="w-[300px] h-[300px] relative overflow-hidden rounded-md">
               <Button
                 size="icon"
                 variant="ghost"
@@ -130,28 +133,34 @@ function AudioPage() {
               <Image
                 src={track?.coverImageUrl || "https://via.placeholder.com/300"}
                 alt="Album Cover"
-                height={350}
-                width={350}
-                className="object-cover"
+                height={300}
+                width={300}
+                className="object-cover w-full h-full"
               />
             </div>
-            <div className="mt-4 flex items-center justify-between w-[350px]">
+            <div className="mt-4 flex items-center justify-between w-[300px]">
               <h2 className="text-lg font-semibold text-white">
                 {track?.title || "Unknown Title"}
               </h2>
               <Button
                 size="icon"
                 variant="ghost"
-                className={`text-red-500 ${isLiked ? "text-red-600" : ""}`}
-                onClick={() => setIsLiked(!isLiked)}
+                className="hover:bg-transparent hover:text-white"
+                onClick={() => likeTrack(track?.id || "")}
               >
-                <Heart className="w-6 h-6" />
+                <Heart
+                  className="w-6 h-6"
+                  fill={isLiked ? "green" : "none"}
+                  stroke={isLiked ? "green" : "currentColor"}
+                />
               </Button>
             </div>
 
             {/* Seek Bar */}
             <div className="flex items-center gap-4 w-full max-w-md mt-4">
-              <div className="text-xs text-zinc-400">{formatTime(currentTime)}</div>
+              <div className="text-xs text-zinc-400">
+                {formatTime(currentTime)}
+              </div>
 
               <Slider
                 value={[currentTime]}

@@ -1,14 +1,14 @@
 import { createGraphqlClient } from "@/clients/api";
 import { CreateTrackPayload } from "@/gql/graphql";
-import { createTrackMutation } from "@/graphql/mutations/track";
+import { createTrackMutation, deleteTrackMutation, likeTrackMutation } from "@/graphql/mutations/track";
 import { getFeedTracksQuery, getTrackByIdQuery } from "@/graphql/queries/track";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 export const useGetFeedTracks = () => {
     return useQuery({
-        queryKey: ["feedPosts"],
+        queryKey: ["feedTracks"],
         queryFn: async () => {
             const graphqlClient = createGraphqlClient()
             const { getFeedTracks } = await graphqlClient.request(getFeedTracksQuery);
@@ -17,12 +17,14 @@ export const useGetFeedTracks = () => {
     })
 };
 
-export const useGetTrackById = (id: string) => {
+export const useGetTrackById = (trackId: string) => {
     return useQuery({
-        queryKey: ["track", id],
+        queryKey: ["track", trackId],
         queryFn: async () => {
+            console.log("inside useGetTrackById");
+            
             const graphqlClient = createGraphqlClient()
-            const { getTrackById } = await graphqlClient.request(getTrackByIdQuery, {id});
+            const { getTrackById } = await graphqlClient.request(getTrackByIdQuery, {trackId});
             return getTrackById;
         }
     })
@@ -66,6 +68,62 @@ export const useCreateTrack = () => {
         },
         onError: (error: any) => {
             const errorMessage = error.message.split(":").pop()?.trim() || "Something went wrong";
+            toast.error(errorMessage);
+        },
+    });
+};
+
+
+export const useDeleteTrack = () => {
+    return useMutation({
+        mutationFn: async (trackId: string) => {
+            try {
+                const graphqlClient = createGraphqlClient()
+                const { deleteTrack } = await graphqlClient.request(deleteTrackMutation, { trackId });
+                return deleteTrack;
+            } catch (error: any) {
+                throw new Error(error?.response?.errors?.[0]?.message || "Something went wrong");
+            }
+        },
+
+        onSuccess: (data) => {
+            toast.success("Track Deleted successfully");
+        },
+
+        onError: (error: any) => {
+            const errorMessage = error.message.split(':').pop()?.trim() || "Something went wrong";
+            toast.error(errorMessage);
+        }
+    });
+}
+
+export const useLikeTrack = (
+    setIsLiked:React.Dispatch<React.SetStateAction<boolean>>
+) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (trackId: string) => {
+            try {
+                const graphqlClient = createGraphqlClient();
+                const { likeTrack } = await graphqlClient.request(likeTrackMutation, { trackId });
+                return likeTrack ;
+            } catch (error: any) {
+                throw new Error(error?.response?.errors?.[0]?.message || 'Something went wrong');
+            }
+        },
+        onSuccess: (data) => {            
+            if(data){
+                setIsLiked(true)
+                toast.success('Liked successfully');
+            } else {
+                setIsLiked(false)
+                toast.success('UnLiked successfully');
+            }
+            
+        },
+        onError: (error: any) => {
+            const errorMessage = error.message.split(':').pop()?.trim() || 'Something went wrong';
             toast.error(errorMessage);
         },
     });

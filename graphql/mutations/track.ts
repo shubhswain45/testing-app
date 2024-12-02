@@ -1,7 +1,7 @@
-import { graphql } from "@/gql";
+import { graphql } from "@/gql"
 
 export const createTrackMutation = graphql(`#graphql
-   mutation CreateTrack($payload: createTrackPayload!) {
+  mutation CreateTrack($payload: createTrackPayload!) {
   createTrack(payload: $payload) {
     id
     title
@@ -18,3 +18,17 @@ export const createTrackMutation = graphql(`#graphql
   }
 }
 `)
+
+export const likeTrackMutation = graphql(`#graphql
+mutation LikeTrack($trackId: String!) {
+  likeTrack(trackId: $trackId)
+}
+`)
+
+export const deleteTrackMutation = graphql(`#graphql
+  mutation DeleteTrack($trackId: String!) {
+    deleteTrack(trackId: $trackId)
+  }
+`)
+
+

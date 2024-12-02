@@ -14,14 +14,15 @@ export const getFeedTracksQuery = graphql(`#graphql
 `)
 
 export const getTrackByIdQuery = graphql(`#graphql
-  query GetTrackById($id: String!) {
-  getTrackById(id: $id) {
+query GetTrackById($trackId: String!) {
+  getTrackById(trackId: $trackId) {
     id
-      title
-      artist
-      duration
-      audioFileUrl  
-      coverImageUrl
+    title
+    artist
+    duration
+    audioFileUrl  
+    coverImageUrl
+    hasLiked
   }
 }
 `)

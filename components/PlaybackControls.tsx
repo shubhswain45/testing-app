@@ -17,6 +17,7 @@ import { AiOutlineClose } from "react-icons/ai"; // Close icon
 import Image from "next/image";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { usePlaybackControlsStore } from "@/store/PlaybackControlsStore";
+import { useLikeTrack } from "@/hooks/track";
 
 const style = `
   @keyframes slideInFromBottom {
@@ -76,7 +77,6 @@ export const PlaybackControls = () => {
   const [duration, setDuration] = useState(0);
   const { closePlaybackControls } = usePlaybackControlsStore();
   const [isClosed, setIsClosed] = useState(false);
-
 
   const formatTime = useCallback((time: number) => {
     const minutes = Math.floor(time / 60);

@@ -20,10 +20,12 @@ const documents = {
     "#graphql\n    mutation LogoutUser {\n        logoutUser\n    }\n": types.LogoutUserDocument,
     "#graphql\n    mutation ForgotPassword($emailOrUsername: String!) {\n  forgotPassword(emailOrUsername: $emailOrUsername)\n}\n": types.ForgotPasswordDocument,
     "#graphql\n    mutation ResetPassword($payload: ResetPasswordPayload!){       \n        resetPassword(payload: $payload)\n    }\n": types.ResetPasswordDocument,
-    "#graphql\n   mutation CreateTrack($payload: createTrackPayload!) {\n  createTrack(payload: $payload) {\n    id\n    title\n    artist\n    duration\n    coverImageUrl\n    audioFileUrl\n\n    author {\n      id\n      username\n      profileImageURL\n    }\n  }\n}\n": types.CreateTrackDocument,
+    "#graphql\n  mutation CreateTrack($payload: createTrackPayload!) {\n  createTrack(payload: $payload) {\n    id\n    title\n    artist\n    duration\n    coverImageUrl\n    audioFileUrl\n\n    author {\n      id\n      username\n      profileImageURL\n    }\n  }\n}\n": types.CreateTrackDocument,
+    "#graphql\nmutation LikeTrack($trackId: String!) {\n  likeTrack(trackId: $trackId)\n}\n": types.LikeTrackDocument,
+    "#graphql\n  mutation DeleteTrack($trackId: String!) {\n    deleteTrack(trackId: $trackId)\n  }\n": types.DeleteTrackDocument,
     "#graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            profileImageURL\n            email\n            username\n            fullName\n            isVerified\n        }\n    }\n": types.GetCurrentUserDocument,
     "#graphql\n  query GetFeedTracks {\n    getFeedTracks {\n      id\n      title\n      artist\n      duration\n      audioFileUrl  \n      coverImageUrl\n    }\n  }\n": types.GetFeedTracksDocument,
-    "#graphql\n  query GetTrackById($id: String!) {\n  getTrackById(id: $id) {\n    id\n      title\n      artist\n      duration\n      audioFileUrl  \n      coverImageUrl\n  }\n}\n": types.GetTrackByIdDocument,
+    "#graphql\nquery GetTrackById($trackId: String!) {\n  getTrackById(trackId: $trackId) {\n    id\n    title\n    artist\n    duration\n    audioFileUrl  \n    coverImageUrl\n    hasLiked\n  }\n}\n": types.GetTrackByIdDocument,
 };
 
 /**
@@ -67,7 +69,15 @@ export function graphql(source: "#graphql\n    mutation ResetPassword($payload: 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "#graphql\n   mutation CreateTrack($payload: createTrackPayload!) {\n  createTrack(payload: $payload) {\n    id\n    title\n    artist\n    duration\n    coverImageUrl\n    audioFileUrl\n\n    author {\n      id\n      username\n      profileImageURL\n    }\n  }\n}\n"): (typeof documents)["#graphql\n   mutation CreateTrack($payload: createTrackPayload!) {\n  createTrack(payload: $payload) {\n    id\n    title\n    artist\n    duration\n    coverImageUrl\n    audioFileUrl\n\n    author {\n      id\n      username\n      profileImageURL\n    }\n  }\n}\n"];
+export function graphql(source: "#graphql\n  mutation CreateTrack($payload: createTrackPayload!) {\n  createTrack(payload: $payload) {\n    id\n    title\n    artist\n    duration\n    coverImageUrl\n    audioFileUrl\n\n    author {\n      id\n      username\n      profileImageURL\n    }\n  }\n}\n"): (typeof documents)["#graphql\n  mutation CreateTrack($payload: createTrackPayload!) {\n  createTrack(payload: $payload) {\n    id\n    title\n    artist\n    duration\n    coverImageUrl\n    audioFileUrl\n\n    author {\n      id\n      username\n      profileImageURL\n    }\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "#graphql\nmutation LikeTrack($trackId: String!) {\n  likeTrack(trackId: $trackId)\n}\n"): (typeof documents)["#graphql\nmutation LikeTrack($trackId: String!) {\n  likeTrack(trackId: $trackId)\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "#graphql\n  mutation DeleteTrack($trackId: String!) {\n    deleteTrack(trackId: $trackId)\n  }\n"): (typeof documents)["#graphql\n  mutation DeleteTrack($trackId: String!) {\n    deleteTrack(trackId: $trackId)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -79,7 +89,7 @@ export function graphql(source: "#graphql\n  query GetFeedTracks {\n    getFeedT
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "#graphql\n  query GetTrackById($id: String!) {\n  getTrackById(id: $id) {\n    id\n      title\n      artist\n      duration\n      audioFileUrl  \n      coverImageUrl\n  }\n}\n"): (typeof documents)["#graphql\n  query GetTrackById($id: String!) {\n  getTrackById(id: $id) {\n    id\n      title\n      artist\n      duration\n      audioFileUrl  \n      coverImageUrl\n  }\n}\n"];
+export function graphql(source: "#graphql\nquery GetTrackById($trackId: String!) {\n  getTrackById(trackId: $trackId) {\n    id\n    title\n    artist\n    duration\n    audioFileUrl  \n    coverImageUrl\n    hasLiked\n  }\n}\n"): (typeof documents)["#graphql\nquery GetTrackById($trackId: String!) {\n  getTrackById(trackId: $trackId) {\n    id\n    title\n    artist\n    duration\n    audioFileUrl  \n    coverImageUrl\n    hasLiked\n  }\n}\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
