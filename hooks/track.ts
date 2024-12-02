@@ -1,7 +1,7 @@
 import { createGraphqlClient } from "@/clients/api";
 import { CreateTrackPayload } from "@/gql/graphql";
 import { createTrackMutation } from "@/graphql/mutations/track";
-import { getFeedTracksQuery } from "@/graphql/queries/track";
+import { getFeedTracksQuery, getTrackByIdQuery } from "@/graphql/queries/track";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -16,6 +16,18 @@ export const useGetFeedTracks = () => {
         }
     })
 };
+
+export const useGetTrackById = (id: string) => {
+    return useQuery({
+        queryKey: ["track", id],
+        queryFn: async () => {
+            const graphqlClient = createGraphqlClient()
+            const { getTrackById } = await graphqlClient.request(getTrackByIdQuery, {id});
+            return getTrackById;
+        }
+    })
+};
+
 
 export const useCreateTrack = () => {
     const router = useRouter();

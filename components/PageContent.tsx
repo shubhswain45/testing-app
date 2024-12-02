@@ -29,12 +29,6 @@ const PageContent: React.FC = () => {
         <div key={item?.id}>
 
         <SongItem data={item} idx={idx} />
-        <SongItem data={item} idx={idx} />
-
-        <SongItem data={item} idx={idx} />
-        <SongItem data={item} idx={idx} />
-        <SongItem data={item} idx={idx} />
-        <SongItem data={item} idx={idx} />
 
         </div>
       ))}

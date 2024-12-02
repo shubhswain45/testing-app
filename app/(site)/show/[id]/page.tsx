@@ -1,114 +1,205 @@
 "use client";
+
+import { useParams } from "next/navigation";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCw, Heart } from "lucide-react";
 import Header from "@/components/Header";
 import { BiDotsVertical } from "react-icons/bi";
+import { useGetTrackById } from "@/hooks/track";
+import { usePlayAudioStore } from "@/store/PlayAudioStore";
 
 function AudioPage() {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { id } = useParams();
+  const validId = typeof id === "string" ? id : "";
+  const { data: track, isLoading } = useGetTrackById(validId);
+  const { setAudioDetails, audioDetails } = usePlayAudioStore();
+  const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration] = useState(240); // Example duration in seconds
   const [isLiked, setIsLiked] = useState(false);
+  const [scaleAnimation, setScaleAnimation] = useState(false); // State to trigger scale animation
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
+  const audioElement = useRef<HTMLAudioElement | null>(null);
 
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
-  };
+  useEffect(() => {
+    if (track) {
+      setAudioDetails({
+        title: track?.title || "",
+        artist: track?.artist || "",
+        duration: track?.duration || "",
+        coverImageUrl: track?.coverImageUrl || null,
+        audioFileUrl: track?.audioFileUrl || "",
+        audioRef: audioElement,
+      });
+    }
+  }, [setAudioDetails, track]);
 
-  const handleSeek = (amount: number) => {
-    setCurrentTime((prev) => Math.max(0, Math.min(duration, prev + amount)));
-  };
+  useEffect(() => {
+    const audio = audioElement.current;
+    if (!audio) return;
 
-  const formatTime = (time: number) => {
+    const updateTime = () => setCurrentTime(audio.currentTime);
+    const handleMetadata = () => setDuration(audio.duration);
+    const handleEnded = () => setAudioDetails({ isPlaying: false });
+
+    audio.addEventListener("timeupdate", updateTime);
+    audio.addEventListener("loadedmetadata", handleMetadata);
+    audio.addEventListener("ended", handleEnded);
+
+    return () => {
+      audio.removeEventListener("timeupdate", updateTime);
+      audio.removeEventListener("loadedmetadata", handleMetadata);
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [setAudioDetails, audioDetails]);
+
+  const handleSeek = useCallback((value: number[]) => {
+    const audio = audioElement.current;
+    if (audio) {
+      audio.currentTime = value[0];
+      setCurrentTime(value[0]);
+    }
+  }, []);
+
+  const formatTime = useCallback((time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    const audio = audioElement.current;
+    if (audioDetails.isPlaying) {
+      audio?.pause();
+    } else {
+      audio?.play();
+    }
+    setAudioDetails({ isPlaying: !audioDetails.isPlaying });
+
+    // Trigger scale animation when play button is clicked
+    setScaleAnimation(true);
+    setTimeout(() => setScaleAnimation(false), 300); // Reset animation after 0.3s
+  }, [audioDetails.isPlaying, setAudioDetails]);
+
+  const skipTime = (seconds: number) => {
+    const audio = audioElement.current;
+    if (audio) {
+      audio.currentTime += seconds;
+      setCurrentTime(audio.currentTime);
+    }
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <Header>
-      <div className="flex flex-col items-center text-neutral-400 p-6">
-        {/* Image Section with Title, Heart Icon, and More Button */}
-        <div className="w-[350px] h-[350px] relative overflow-hidden rounded-md">
-          {/* More Button (Three Dots Vertical) */}
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute top-2 right-2 text-white"
-          >
-            <BiDotsVertical className="w-10 h-10" /> {/* Increased size */}
-          </Button>
+    <>
+      <style>{`
+        @keyframes scaleAnimation {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
 
-          {/* Image */}
-          <Image
-            src="https://via.placeholder.com/300"
-            alt="Album Cover"
-            height={350}
-            width={350}
-            className="object-cover"
-          />
-        </div>
+        .scale-animation {
+          animation: scaleAnimation 0.3s ease-in-out;
+        }
+      `}</style>
 
-        {/* Title and Heart Icon Below the Image */}
-        <div className="mt-4 flex items-center justify-between w-[350px]">
-          <h2 className="text-lg font-semibold text-white">Album Title</h2>
-          <Button
-            size="icon"
-            variant="ghost"
-            className={`text-red-500 ${isLiked ? "text-red-600" : ""}`}
-            onClick={toggleLike}
-          >
-            <Heart className="w-6 h-6" />
-          </Button>
-        </div>
+      <div className="text-neutral-400 rounded-lg w-full h-full overflow-hidden overflow-y-auto">
+        <Header>
+          <div className="flex flex-col items-center justify-center w-full h-full">
+            {/* Image Section */}
+            <div className="w-[350px] h-[350px] relative overflow-hidden rounded-md">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-2 right-2 text-white"
+              >
+                <BiDotsVertical className="w-10 h-10" />
+              </Button>
+              <Image
+                src={track?.coverImageUrl || "https://via.placeholder.com/300"}
+                alt="Album Cover"
+                height={350}
+                width={350}
+                className="object-cover"
+              />
+            </div>
+            <div className="mt-4 flex items-center justify-between w-[350px]">
+              <h2 className="text-lg font-semibold text-white">
+                {track?.title || "Unknown Title"}
+              </h2>
+              <Button
+                size="icon"
+                variant="ghost"
+                className={`text-red-500 ${isLiked ? "text-red-600" : ""}`}
+                onClick={() => setIsLiked(!isLiked)}
+              >
+                <Heart className="w-6 h-6" />
+              </Button>
+            </div>
 
-        {/* Progress Bar (Increased slider size) */}
-        <div className="flex items-center gap-4 w-full max-w-md mt-4">
-          <span className="text-xs">{formatTime(currentTime)}</span>
-          <Slider
-            value={[currentTime]}
-            max={duration}
-            step={1}
-            onValueChange={(value) => setCurrentTime(value[0])}
-            className="flex-1 h-4 hover:cursor-grab active:cursor-grabbing" // Increased height for slider
-          />
-          <span className="text-xs">{formatTime(duration)}</span>
-        </div>
+            {/* Seek Bar */}
+            <div className="flex items-center gap-4 w-full max-w-md mt-4">
+              <div className="text-xs text-zinc-400">{formatTime(currentTime)}</div>
 
-        {/* Controls Section */}
-        <div className="flex items-center gap-6 mt-6">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="hover:text-green-500 text-gray-400"
-            onClick={() => handleSeek(-10)}
-          >
-            <RotateCw className="rotate-180 w-6 h-6" /> {/* 10s Back */}
-          </Button>
-          <Button
-            size="icon"
-            className="bg-green-500 text-black rounded-full h-12 w-12"
-            onClick={togglePlay}
-          >
-            {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="hover:text-green-500 text-gray-400"
-            onClick={() => handleSeek(10)}
-          >
-            <RotateCw className="w-6 h-6" /> {/* 10s Forward */}
-          </Button>
-        </div>
+              <Slider
+                value={[currentTime]}
+                max={duration || 100}
+                step={1}
+                className="w-full"
+                onValueChange={handleSeek}
+              />
+              <div className="text-xs text-zinc-400">{formatTime(duration)}</div>
+            </div>
+
+            {/* Playback Controls */}
+            <div className="flex items-center gap-6 mt-6">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="hover:bg-transparent hover:text-white"
+                onClick={() => skipTime(-10)} // Go back 10 seconds
+              >
+                <RotateCw className="rotate-180 w-6 h-6" />
+              </Button>
+              <Button
+                size="icon"
+                className={`bg-green-500 hover:bg-green-600 text-black rounded-full h-12 w-12 ${scaleAnimation ? "scale-animation" : ""}`}
+                onClick={togglePlay}
+              >
+                {audioDetails.isPlaying ? (
+                  <Pause className="w-6 h-6" />
+                ) : (
+                  <Play className="w-6 h-6" />
+                )}
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="hover:bg-transparent hover:text-white"
+                onClick={() => skipTime(10)} // Go forward 10 seconds
+              >
+                <RotateCw className="w-6 h-6" />
+              </Button>
+            </div>
+
+            {/* Audio Element */}
+            <audio ref={audioElement} src={track?.audioFileUrl || undefined} />
+          </div>
+        </Header>
       </div>
-    </Header>
+    </>
   );
 }
 
