@@ -1,15 +1,33 @@
 import { create } from "zustand";
+import React from "react"; // Required for React.createRef
 
-interface PlayAudioStore {
+interface AudioDetails {
+  title: string | null;
+  artist: string | null;
+  duration: string | null;
+  coverImageUrl: string | null;
   audioFileUrl: string | null;
   isPlaying: boolean;
-  setAudioFileUrl: (audioFileUrl: string) => void;
-  setIsPlaying: (isPlaying: boolean) => void;
+  audioRef: React.RefObject<HTMLAudioElement> | null; // Add the ref here
+}
+
+interface PlayAudioStore {
+  audioDetails: AudioDetails;
+  setAudioDetails: (details: Partial<AudioDetails>) => void;
 }
 
 export const usePlayAudioStore = create<PlayAudioStore>((set) => ({
-  audioFileUrl: null, // default value
-  isPlaying: false,
-  setAudioFileUrl: (audioFileUrl: string) => set({ audioFileUrl }),
-  setIsPlaying: (isPlaying: boolean) => set({ isPlaying }),
+  audioDetails: {
+    title: null,
+    artist: null,
+    duration: null,
+    coverImageUrl: null,
+    audioFileUrl: null,
+    isPlaying: false,
+    audioRef: React.createRef<HTMLAudioElement>(), // Initialize the ref
+  },
+  setAudioDetails: (details) =>
+    set((state) => ({
+      audioDetails: { ...state.audioDetails, ...details },
+    })),
 }));

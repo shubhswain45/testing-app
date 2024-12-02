@@ -4,12 +4,14 @@ import { useGetFeedTracks } from "@/hooks/track"
 import SongItem from "./SongItem"
 
 const PageContent: React.FC = () => {
-    const {data: songs} = useGetFeedTracks()
+    const {data: songs} = useGetFeedTracks()    
 
   if (songs?.length === 0) {
     return <div className="mt-4 text-neutral-400">No songs available.</div>
   }
 
+  console.log("inside page content");
+  
   return (
     <div
       className="

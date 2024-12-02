@@ -2,9 +2,13 @@
 
 import Image from "next/image"
 import PlayButton from "./PlayButton"
+import { useRouter } from "next/navigation"
 
 interface DataProps {
     id: string,
+    title: string,
+    artist: string,
+    duration: string
     audioFileUrl: string
     coverImageUrl?: string | null
 }
@@ -12,10 +16,11 @@ interface DataProps {
 const SongItem = ({ data, idx }: { data: DataProps | undefined | null, idx: number }) => {
 
     console.log(idx);
-    
+    const router = useRouter()
+
     return (
         <div
-            onClick={() => { }}
+            onClick={() => { router.push(`show/${data?.id}`)}}
             className="
         relative 
         group 
@@ -41,10 +46,10 @@ const SongItem = ({ data, idx }: { data: DataProps | undefined | null, idx: numb
           rounded-md 
           overflow-hidden
         ">
-                <Image className="object-cover" src={"https://github.com/nicitaacom/19_spotify-clone/blob/production/public/images/liked.png?raw=true"} fill alt="Image" />
+                <Image className="object-cover" src={data?.coverImageUrl ? data?.coverImageUrl : "https://via.placeholder.com/56"} fill alt="Image" />
             </div>
             <div className="flex flex-col items-start w-full pt-4 gap-y-1">
-                <p className="font-semibold truncate w-full">title</p>
+                <p className="font-semibold truncate w-full">{data?.title}</p>
                 <p
                     className="
             text-neutral-400 
@@ -53,7 +58,7 @@ const SongItem = ({ data, idx }: { data: DataProps | undefined | null, idx: numb
             w-full 
             truncate
           ">
-                    By author
+                    By {data?.artist}
                 </p>
             </div>
             <div
@@ -62,7 +67,7 @@ const SongItem = ({ data, idx }: { data: DataProps | undefined | null, idx: numb
           bottom-24 
           right-5
         ">
-                <PlayButton audioFileUrl={data?.audioFileUrl || ""}/>
+                <PlayButton data={data} />
             </div>
         </div>
     )

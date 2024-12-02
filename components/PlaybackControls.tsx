@@ -1,8 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayAudioStore } from "@/store/PlayAudioStore";
-import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from "lucide-react";
+import {
+  Laptop2,
+  ListMusic,
+  Mic2,
+  Pause,
+  Play,
+  Repeat,
+  Shuffle,
+  SkipBack,
+  SkipForward,
+  Volume1,
+} from "lucide-react";
+import { AiOutlineClose } from "react-icons/ai"; // Close icon
+import Image from "next/image";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { usePlaybackControlsStore } from "@/store/PlaybackControlsStore";
 
 const style = `
   @keyframes slideInFromBottom {
@@ -13,6 +27,17 @@ const style = `
     100% {
       transform: translateY(0);
       opacity: 1;
+    }
+  }
+
+  @keyframes slideOutToBottom {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100%);
+      opacity: 0;
     }
   }
 
@@ -32,18 +57,25 @@ const style = `
     animation: slideInFromBottom 0.2s ease-out forwards;
   }
 
+  .slide-exit {
+    animation: slideOutToBottom 0.2s ease-out forwards;
+  }
+
   .scale-animation {
     animation: scaleButton 0.3s ease-in-out;
   }
 `;
 
 export const PlaybackControls = () => {
-  const { audioFileUrl, isPlaying, setIsPlaying } = usePlayAudioStore();
+  const { audioDetails, setAudioDetails } = usePlayAudioStore();
+  const { audioFileUrl, isPlaying, title, artist } = audioDetails;
   const audioElement = useRef<HTMLAudioElement | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(50);
   const [duration, setDuration] = useState(0);
+  const { closePlaybackControls } = usePlaybackControlsStore();
+  const [isClosed, setIsClosed] = useState(false);
 
   const formatTime = useCallback((time: number) => {
     const minutes = Math.floor(time / 60);
@@ -53,15 +85,13 @@ export const PlaybackControls = () => {
 
   useEffect(() => {
     const audio = audioElement.current;
+      if(isPlaying){
+        audio?.play();
+        setAudioDetails({ audioRef: audioElement });
+      }
+    
+  }, [audioFileUrl, setAudioDetails, isPlaying]);
 
-    if (audioFileUrl) {
-      audio?.play();
-      setIsPlaying(true);
-    } else {
-      audio?.pause();
-      setIsPlaying(false);
-    }
-  }, [audioFileUrl, setIsPlaying]);
 
   useEffect(() => {
     const audio = audioElement.current;
@@ -69,7 +99,7 @@ export const PlaybackControls = () => {
 
     const updateTime = () => setCurrentTime(audio.currentTime);
     const handleMetadata = () => setDuration(audio.duration);
-    const handleEnded = () => setIsPlaying(false);
+    const handleEnded = () => setAudioDetails({ isPlaying: false });
 
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", handleMetadata);
@@ -80,7 +110,7 @@ export const PlaybackControls = () => {
       audio.removeEventListener("loadedmetadata", handleMetadata);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [setIsPlaying]);
+  }, [setAudioDetails]);
 
   useEffect(() => {
     if (audioElement.current) {
@@ -96,10 +126,10 @@ export const PlaybackControls = () => {
     } else {
       audioElement.current?.play();
     }
-    setIsPlaying(!isPlaying);
+    setAudioDetails({ isPlaying: !isPlaying });
 
     setTimeout(() => setIsAnimating(false), 300);
-  }, [isPlaying, setIsPlaying]);
+  }, [isPlaying, setAudioDetails]);
 
   const handleSeek = useCallback((value: number[]) => {
     const audio = audioElement.current;
@@ -111,29 +141,47 @@ export const PlaybackControls = () => {
 
   const handleVolumeChange = useCallback((value: number[]) => setVolume(value[0]), []);
 
+  const closePlayer = () => {
+    setAudioDetails({ isPlaying: false });
+    setIsClosed(true);
+    setTimeout(() => closePlaybackControls(), 200);
+  };
+
   return (
     <>
       <style>{style}</style>
-      <footer className="fixed bottom-0 left-0 right-0 h-20 sm:h-24 bg-zinc-900 border-t border-zinc-800 px-4 z-50 slide-enter">
-        <div className="flex justify-between items-center h-full max-w-[1800px] mx-auto">
-          {/* Currently playing song */}
-          <div className="hidden sm:flex items-center gap-4 min-w-[180px] w-[30%]">
-            <img
-              src="https://via.placeholder.com/56"
-              alt="Song Thumbnail"
-              className="w-14 h-14 object-cover rounded-md"
-            />
+      <footer
+        className={`fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 px-4 z-50 ${isClosed ? "slide-exit" : "slide-enter"
+          }`}
+        style={{ height: "112px" }} // Enforcing consistent height
+      >
+        <div className="flex justify-between items-center h-full max-w-[1800px] mx-auto relative">
+          <Button
+            onClick={closePlayer}
+            className="absolute top-0 right-0 text-white hover:bg-transparent rounded-full p-0.5 bg-transparent"
+          >
+            <AiOutlineClose className="h-4 w-4" />
+          </Button>
+
+          <div className="flex items-center gap-4 min-w-[180px] w-[30%]">
+            <div className="w-[56px] h-[56px] relative overflow-hidden">
+              <Image
+                className="object-cover"
+                src={audioDetails?.coverImageUrl || "https://via.placeholder.com/56"}
+                alt="Image"
+                fill
+              />
+            </div>
             <div className="flex-1 min-w-0">
               <div className="font-medium truncate hover:underline cursor-pointer">
-                Dummy Song Title
+                {title || "Dummy Song Title"}
               </div>
               <div className="text-sm text-zinc-400 truncate hover:underline cursor-pointer">
-                Dummy Artist
+                {artist || "Dummy Artist"}
               </div>
             </div>
           </div>
 
-          {/* Player controls */}
           <div className="flex flex-col items-center gap-2 flex-1 max-w-full sm:max-w-[45%]">
             <div className="flex items-center gap-4 sm:gap-6">
               <Button size="icon" variant="ghost" className="hidden sm:inline-flex hover:text-white text-zinc-400">
@@ -144,7 +192,8 @@ export const PlaybackControls = () => {
               </Button>
               <Button
                 size="icon"
-                className={`bg-white hover:bg-white/80 text-black rounded-full h-8 w-8 ${isAnimating ? "scale-animation" : ""}`}
+                className={`bg-white hover:bg-white/80 text-black rounded-full h-8 w-8 ${isAnimating ? "scale-animation" : ""
+                  }`}
                 onClick={togglePlay}
               >
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
@@ -157,20 +206,19 @@ export const PlaybackControls = () => {
               </Button>
             </div>
 
-            <div className="hidden sm:flex items-center gap-2 w-full">
+            <div className="flex items-center gap-2 w-full">
               <div className="text-xs text-zinc-400">{formatTime(currentTime)}</div>
               <Slider
                 value={[currentTime]}
                 max={duration || 100}
                 step={1}
-                className="w-full hover:cursor-grab active:cursor-grabbing"
+                className="w-full"
                 onValueChange={handleSeek}
               />
               <div className="text-xs text-zinc-400">{formatTime(duration)}</div>
             </div>
           </div>
 
-          {/* Volume controls */}
           <div className="hidden sm:flex items-center gap-4 min-w-[180px] w-[30%] justify-end">
             <Button size="icon" variant="ghost" className="hover:text-white text-zinc-400">
               <Mic2 className="h-4 w-4" />
@@ -181,23 +229,21 @@ export const PlaybackControls = () => {
             <Button size="icon" variant="ghost" className="hover:text-white text-zinc-400">
               <Laptop2 className="h-4 w-4" />
             </Button>
-            <div className="flex items-center gap-2">
-              <Button size="icon" variant="ghost" className="hover:text-white text-zinc-400">
-                <Volume1 className="h-4 w-4" />
-              </Button>
-              <Slider
-                value={[volume]}
-                max={100}
-                step={1}
-                onValueChange={handleVolumeChange}
-                className="w-24 hover:cursor-grab active:cursor-grabbing"
-              />
-            </div>
+            <Slider
+              value={[volume]}
+              onValueChange={handleVolumeChange}
+              min={0}
+              max={100}
+              step={1}
+              className="w-[100px]"
+            />
+            <Button size="icon" variant="ghost" className="hover:text-white text-zinc-400">
+              <Volume1 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
+        <audio ref={audioElement} src={audioFileUrl || undefined} />
       </footer>
-
-      {audioFileUrl && <audio ref={audioElement} src={audioFileUrl} />}
     </>
   );
 };

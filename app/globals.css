@@ -17,6 +17,7 @@ body,
   color: #aaa; /* Optional: Set the color of the placeholder */
 }
 
+
 ::-webkit-scrollbar {
 	width: 7px;
 }

@@ -20,7 +20,7 @@ function Page() {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 mt-4">
           <ListItem image="https://github.com/nicitaacom/19_spotify-clone/blob/production/public/images/liked.png?raw=truen" name="Liked Songs" href="liked" />
         </div>
-      </Header>
+      </Header>        
       <div className="mt-2 mb-7 px-6">
         <div className="flex justify-between items-center">
           <h1 className="text-white text-2xl font-semibold">Newest Songs</h1>

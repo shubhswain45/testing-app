@@ -22,7 +22,7 @@ const documents = {
     "#graphql\n    mutation ResetPassword($payload: ResetPasswordPayload!){       \n        resetPassword(payload: $payload)\n    }\n": types.ResetPasswordDocument,
     "#graphql\n   mutation CreateTrack($payload: createTrackPayload!) {\n  createTrack(payload: $payload) {\n    id\n    title\n    artist\n    duration\n    coverImageUrl\n    audioFileUrl\n\n    author {\n      id\n      username\n      profileImageURL\n    }\n  }\n}\n": types.CreateTrackDocument,
     "#graphql\n    query GetCurrentUser {\n        getCurrentUser {\n            id\n            profileImageURL\n            email\n            username\n            fullName\n            isVerified\n        }\n    }\n": types.GetCurrentUserDocument,
-    "#graphql\n   query GetFeedTracks {\n  getFeedTracks {\n  id\n  audioFileUrl  \n  coverImageUrl\n  }\n}\n": types.GetFeedTracksDocument,
+    "#graphql\n  query GetFeedTracks {\n    getFeedTracks {\n      id\n      title\n      artist\n      duration\n      audioFileUrl  \n      coverImageUrl\n    }\n  }\n": types.GetFeedTracksDocument,
 };
 
 /**
@@ -74,7 +74,7 @@ export function graphql(source: "#graphql\n    query GetCurrentUser {\n        g
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "#graphql\n   query GetFeedTracks {\n  getFeedTracks {\n  id\n  audioFileUrl  \n  coverImageUrl\n  }\n}\n"): (typeof documents)["#graphql\n   query GetFeedTracks {\n  getFeedTracks {\n  id\n  audioFileUrl  \n  coverImageUrl\n  }\n}\n"];
+export function graphql(source: "#graphql\n  query GetFeedTracks {\n    getFeedTracks {\n      id\n      title\n      artist\n      duration\n      audioFileUrl  \n      coverImageUrl\n    }\n  }\n"): (typeof documents)["#graphql\n  query GetFeedTracks {\n    getFeedTracks {\n      id\n      title\n      artist\n      duration\n      audioFileUrl  \n      coverImageUrl\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
