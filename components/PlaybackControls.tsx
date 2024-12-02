@@ -77,6 +77,7 @@ export const PlaybackControls = () => {
   const { closePlaybackControls } = usePlaybackControlsStore();
   const [isClosed, setIsClosed] = useState(false);
 
+
   const formatTime = useCallback((time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -85,11 +86,11 @@ export const PlaybackControls = () => {
 
   useEffect(() => {
     const audio = audioElement.current;
-      if(isPlaying){
-        audio?.play();
-        setAudioDetails({ audioRef: audioElement });
-      }
-    
+    if (isPlaying) {
+      audio?.play();
+      setAudioDetails({ audioRef: audioElement });
+    }
+
   }, [audioFileUrl, setAudioDetails, isPlaying]);
 
 
@@ -163,7 +164,7 @@ export const PlaybackControls = () => {
             <AiOutlineClose className="h-4 w-4" />
           </Button>
 
-          <div className="flex items-center gap-4 min-w-[180px] w-[30%]">
+          <div className="flex items-center gap-4 min-w-[180px] w-[30%] sm:flex hidden">
             <div className="w-[56px] h-[56px] relative overflow-hidden">
               <Image
                 className="object-cover"
@@ -181,6 +182,7 @@ export const PlaybackControls = () => {
               </div>
             </div>
           </div>
+
 
           <div className="flex flex-col items-center gap-2 flex-1 max-w-full sm:max-w-[45%]">
             <div className="flex items-center gap-4 sm:gap-6">

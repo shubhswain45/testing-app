@@ -7,7 +7,7 @@ import React from 'react'
 
 function Page() {
   const { isOpen } = usePlaybackControlsStore()
-  const height = isOpen ? "h-[500px]" : "h-full" // fixed height value syntax
+  const height = isOpen ? "h-[2500px]" : "h-full" // fixed height value syntax
 
   console.log(height, "height");
   

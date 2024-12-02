@@ -26,7 +26,17 @@ const PageContent: React.FC = () => {
         mt-4
       ">
       {songs?.map((item, idx) => (
-        <SongItem key={item?.id} data={item} idx={idx} />
+        <div key={item?.id}>
+
+        <SongItem data={item} idx={idx} />
+        <SongItem data={item} idx={idx} />
+
+        <SongItem data={item} idx={idx} />
+        <SongItem data={item} idx={idx} />
+        <SongItem data={item} idx={idx} />
+        <SongItem data={item} idx={idx} />
+
+        </div>
       ))}
     </div>
   )
