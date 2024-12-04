@@ -11,7 +11,7 @@ import React from "react";
 const Page = () => {
   const { username } = useParams();
   console.log("username", username);
-  const { data, isLoading: isFetchingCurrentUser } = useCurrentUser()
+  const {isLoading: isFetchingCurrentUser } = useCurrentUser()
 
   const validUsername = typeof username === "string" ? username : "";
   const { data: user, isLoading: isFetchingUserProfile } = useGetUserProfile(validUsername);

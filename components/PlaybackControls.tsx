@@ -17,7 +17,6 @@ import { AiOutlineClose } from "react-icons/ai"; // Close icon
 import Image from "next/image";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { usePlaybackControlsStore } from "@/store/PlaybackControlsStore";
-import { useLikeTrack } from "@/hooks/track";
 
 const style = `
   @keyframes slideInFromBottom {
