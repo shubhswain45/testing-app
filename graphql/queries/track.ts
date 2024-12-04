@@ -1,21 +1,35 @@
 import { graphql } from "@/gql"
 
 export const getFeedTracksQuery = graphql(`#graphql
-  query GetFeedTracks {
-    getFeedTracks {
-      id
+query GetFeedTracks {
+  getFeedTracks {
+         id
       title
       artist
       duration
       audioFileUrl  
       coverImageUrl
-    }
   }
+}
 `)
 
 export const getTrackByIdQuery = graphql(`#graphql
 query GetTrackById($trackId: String!) {
   getTrackById(trackId: $trackId) {
+    id
+    title
+    artist
+    duration
+    audioFileUrl  
+    coverImageUrl
+    hasLiked
+  }
+}
+`)
+
+export const getTrackBydummyIdQuery = graphql(`#graphql
+query GetTrackBydummyId($trackId: String!) {
+  getTrackBydummyId(trackId: $trackId) {
     id
     title
     artist

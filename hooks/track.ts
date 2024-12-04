@@ -100,7 +100,7 @@ export const useDeleteTrack = () => {
 export const useLikeTrack = (
     setIsLiked:React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-    const queryClient = useQueryClient();
+    // const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (trackId: string) => {
@@ -128,3 +128,5 @@ export const useLikeTrack = (
         },
     });
 };
+
+
