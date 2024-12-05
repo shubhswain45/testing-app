@@ -18,10 +18,13 @@ function AudioPage() {
   const { setAudioDetails, audioDetails } = usePlayAudioStore();
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isLiked, setIsLiked] = useState(track?.hasLiked || false);
   const [scaleAnimation, setScaleAnimation] = useState(false);
 
-  const { mutate: likeTrack } = useLikeTrack(setIsLiked);
+  console.log("track", track);
+  
+  const isLiked = track?.hasLiked
+
+  const { mutate: likeTrack } = useLikeTrack(true);
 
   const audioElement = useRef<HTMLAudioElement | null>(null);
 
@@ -35,7 +38,6 @@ function AudioPage() {
         audioFileUrl: track?.audioFileUrl || "",
         audioRef: audioElement,
       });
-      setIsLiked(track?.hasLiked || false);
     }
   }, [setAudioDetails, track]);
 

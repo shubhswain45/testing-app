@@ -1,5 +1,5 @@
 import { createGraphqlClient } from "@/clients/api";
-import { CreateTrackPayload } from "@/gql/graphql";
+import { CreateTrackPayload, Track } from "@/gql/graphql";
 import { createTrackMutation, deleteTrackMutation, likeTrackMutation } from "@/graphql/mutations/track";
 import { getFeedTracksQuery, getTrackByIdQuery } from "@/graphql/queries/track";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,9 +22,9 @@ export const useGetTrackById = (trackId: string) => {
         queryKey: ["track", trackId],
         queryFn: async () => {
             console.log("inside useGetTrackById");
-            
+
             const graphqlClient = createGraphqlClient()
-            const { getTrackById } = await graphqlClient.request(getTrackByIdQuery, {trackId});
+            const { getTrackById } = await graphqlClient.request(getTrackByIdQuery, { trackId });
             return getTrackById;
         }
     })
@@ -98,29 +98,72 @@ export const useDeleteTrack = () => {
 }
 
 export const useLikeTrack = (
-    setIsLiked:React.Dispatch<React.SetStateAction<boolean>>
+    isShowPage: boolean,
+    username?: string
 ) => {
-    // const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (trackId: string) => {
             try {
                 const graphqlClient = createGraphqlClient();
                 const { likeTrack } = await graphqlClient.request(likeTrackMutation, { trackId });
-                return likeTrack ;
+                return {likeTrack, trackId};
             } catch (error: any) {
                 throw new Error(error?.response?.errors?.[0]?.message || 'Something went wrong');
             }
         },
-        onSuccess: (data) => {            
-            if(data){
-                setIsLiked(true)
-                toast.success('Liked successfully');
+        onSuccess: ({likeTrack, trackId}) => {
+            if (isShowPage) {
+                if (likeTrack) {
+                    queryClient.setQueryData(["track", trackId], (oldData: Track) => {
+                        return {
+                            ...oldData,
+                            hasLiked: true
+                        }
+                    })
+                    toast.success('Liked successfully');
+                } else {
+                    queryClient.setQueryData(["track", trackId], (oldData: Track) => {
+                        return {
+                            ...oldData,
+                            hasLiked: false
+                        }
+                    })
+                    toast.success('UnLiked successfully');
+                }
             } else {
-                setIsLiked(false)
-                toast.success('UnLiked successfully');
+                if (likeTrack) {
+                    queryClient.setQueryData(["userTracks", username], (oldData: [Track]) => {
+                        return oldData.map((track) => {
+                            if(track.id == trackId){
+                                return {
+                                    ...track,
+                                    hasLiked: true
+                                }
+                            } else {
+                                return track
+                            }
+                        })
+                    })
+                    toast.success('Liked successfully');
+                } else {
+                    queryClient.setQueryData(["userTracks", username], (oldData: [Track]) => {
+                        return oldData.map((track) => {
+                            if(track.id == trackId){
+                                return {
+                                    ...track,
+                                    hasLiked: false
+                                }
+                            } else {
+                                return track
+                            }
+                        })
+                    })
+                    toast.success('UnLiked successfully');
+                }
             }
-            
+
         },
         onError: (error: any) => {
             const errorMessage = error.message.split(':').pop()?.trim() || 'Something went wrong';

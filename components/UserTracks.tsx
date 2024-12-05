@@ -1,21 +1,28 @@
 import { useGetUserTracks } from '@/hooks/user';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Ellipsis, Heart } from 'lucide-react';
 import { FaPlay, FaPause } from 'react-icons/fa';
 import { usePlaybackControlsStore } from '@/store/PlaybackControlsStore';
 import { usePlayAudioStore } from '@/store/PlayAudioStore';
+import { useLikeTrack } from '@/hooks/track';
+import { useQueryClient } from '@tanstack/react-query';
 
 function UserTracks({ username }: { username: string }) {
   const { data: tracks } = useGetUserTracks(username);
+
+  const {mutate: likeTrack} = useLikeTrack(false, username)
   const { openPlaybackControls, isOpen } = usePlaybackControlsStore();
   const { setAudioDetails, audioDetails } = usePlayAudioStore();
-
+  const queryClient = useQueryClient()
+  
   const pauseAudio = () => {
     audioDetails.audioRef?.current?.pause();
     setAudioDetails({ isPlaying: false });
   };
 
+  console.log("tracks", tracks);
+  
   const playAudio = (index: number) => {
     openPlaybackControls();
     setAudioDetails({
@@ -37,8 +44,7 @@ function UserTracks({ username }: { username: string }) {
       playAudio(index);
     }
   };
-
-
+  
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6 px-6">Tracks</h2>
@@ -81,6 +87,7 @@ function UserTracks({ username }: { username: string }) {
                     size="icon"
                     variant="ghost"
                     className="hover:bg-transparent hover:text-white text-[#6d6d6e]"
+                    onClick={() => likeTrack(track?.id || "")}
                   >
                     <Heart
                       className="w-6 h-6"
