@@ -1,12 +1,10 @@
 import { useGetUserTracks } from '@/hooks/user';
-import React, { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { Ellipsis, Heart } from 'lucide-react';
 import { FaPlay, FaPause } from 'react-icons/fa';
 import { usePlaybackControlsStore } from '@/store/PlaybackControlsStore';
 import { usePlayAudioStore } from '@/store/PlayAudioStore';
 import { useLikeTrack } from '@/hooks/track';
-import { useQueryClient } from '@tanstack/react-query';
 
 function UserTracks({ username }: { username: string }) {
   const { data: tracks } = useGetUserTracks(username);
@@ -14,7 +12,6 @@ function UserTracks({ username }: { username: string }) {
   const {mutate: likeTrack} = useLikeTrack(false, username)
   const { openPlaybackControls, isOpen } = usePlaybackControlsStore();
   const { setAudioDetails, audioDetails } = usePlayAudioStore();
-  const queryClient = useQueryClient()
   
   const pauseAudio = () => {
     audioDetails.audioRef?.current?.pause();
