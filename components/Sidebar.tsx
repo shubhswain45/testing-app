@@ -1,16 +1,30 @@
-export default function Sidebar() {
-    return (
-      <div className="hidden md:flex flex-col w-64 bg-gray-800 text-white h-full fixed top-0 left-0">
-        <h1 className="text-2xl font-bold p-4">Spotify Clone</h1>
-        <nav className="mt-4">
-          <ul className="space-y-4">
-            <li className="px-4 py-2 hover:bg-gray-700 rounded">Home</li>
-            <li className="px-4 py-2 hover:bg-gray-700 rounded">Explore</li>
-            <li className="px-4 py-2 hover:bg-gray-700 rounded">Library</li>
-            <li className="px-4 py-2 hover:bg-gray-700 rounded">Search</li>
-          </ul>
-        </nav>
-      </div>
-    );
-  }
-  
+
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Library } from "lucide-react";
+
+
+const LeftSidebar = () => {
+
+	return (
+		<div className='h-full flex flex-col gap-2'>
+			{/* Navigation menu */}
+
+			{/* Library section */}
+			<div className='flex-1 rounded-lg bg-[#121212] p-4'>
+				<div className='flex items-center justify-between mb-4'>
+					<div className='flex items-center text-white px-2'>
+						<Library className='size-5 mr-2' />
+						<span className='hidden md:inline'>Playlists</span>
+					</div>
+				</div>
+
+				<ScrollArea className='h-[calc(100vh-300px)]'>
+					<div className='space-y-2'>
+						
+					</div>
+				</ScrollArea>
+			</div>
+		</div>
+	);
+};
+export default LeftSidebar;

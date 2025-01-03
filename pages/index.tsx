@@ -1,24 +1,21 @@
-import Sidebar from "./components/Sidebar";
-import FooterNav from "./components/FooterNav";
+import RoundedIcons from '@/components/RoundedIcon';
+import React from 'react';
 
-export default function App() {
+function Index() {
   return (
-    <div className="h-screen flex">
-      {/* Sidebar for larger screens */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex-grow bg-gray-100 ml-0 md:ml-64">
-        <header className="bg-white shadow p-4">
-          <h1 className="text-xl font-semibold">Dashboard</h1>
-        </header>
-        <main className="p-4">
-          <p>Welcome to your Spotify Clone!</p>
-        </main>
+    <div className="bg-[#121212] rounded-lg p-4 h-full overflow-y-auto">
+      <RoundedIcons/>
+      {/* Example Content */}
+      <h1 className="text-2xl font-bold text-white mb-4">Scrollable Content</h1>
+      <div className="space-y-4">
+        {Array.from({ length: 50 }, (_, index) => (
+          <p key={index} className="text-gray-300">
+            This is a sample paragraph to demonstrate scrolling. You can replace this content with your actual data. Line number: {index + 1}
+          </p>
+        ))}
       </div>
-
-      {/* Footer Navigation for smaller screens */}
-      <FooterNav />
     </div>
   );
 }
+
+export default Index;
