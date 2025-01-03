@@ -82,8 +82,8 @@ const AudioFooter = () => {
                             src="https://static.vecteezy.com/system/resources/previews/008/653/792/non_2x/music-man-gamer-line-pop-art-potrait-logo-colorful-design-with-dark-background-abstract-illustration-isolated-black-background-for-t-shirt-poster-clothing-merch-apparel-badge-design-vector.jpg"
                             alt="Album Art"
                             className="rounded-lg mb-4"
-                            width={290}
-                            height={290}
+                            width={350}
+                            height={350}
                         />
                         <h1 className="text-2xl font-bold">Song Title</h1>
                         <p className="text-lg text-gray-200">Artist Name</p>
@@ -92,7 +92,7 @@ const AudioFooter = () => {
             </AnimatePresence>
 
             {!isExpanded && (
-                <footer className="fixed bottom-16 left-0 right-0 bg-gray-900 text-white flex items-center justify-between p-4">
+                <footer className="fixed bottom-16 left-0 right-0 bg-red-500 text-white flex items-center justify-between p-4">
                     <div
                         className="flex items-center gap-4 cursor-pointer"
                         onClick={handleExpand}
